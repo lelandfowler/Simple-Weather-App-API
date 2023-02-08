@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "simple-weather-app-api"
+version = "0.1.0"
+description = "Provide information temperature and himidity data for a given city on a given date."
+authors = ["Leland Fowler"]
+readme = "README.md"
+packages = [{include = "simple_weather_app_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.90.0"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
