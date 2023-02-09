@@ -8,12 +8,17 @@
 - Section 4: UX Discussion
 
 ## Section 1: Overview
-<p>This API is built utilizing FastAPI as the API framework and Uvicorn as the ASGI server.</p>
-<p>By default the API is hosted locally and can be reached by at the following address after starting up the application using Uvicorn.</p>
-<p>Local Host Address: http://127.0.0.1:8000</p>
-<p>API documentation is provided at the following link: http://127.0.0.1:8000/docs</p>
-<p>Poetry is employed for dependency management</p>
-<p>Testing is performed through the Pytest library</p>
+This API is built utilizing FastAPI as the API framework and Uvicorn as the ASGI server.</p>
+By default the API is hosted locally and can be reached by at the following address after starting up the application using Uvicorn.</p>
+Local Host Address: http://127.0.0.1:8000.
+
+API documentation is provided at the following link when the API is hosted locally: http://127.0.0.1:8000/docs.
+
+Poetry is employed for dependency management.
+
+Testing is performed through the Pytest library.
+
+Recommended Python Version: 3.7.16
 
 ### Inputs:
 1. Date
