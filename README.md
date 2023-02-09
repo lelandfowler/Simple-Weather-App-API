@@ -4,7 +4,7 @@
 ## Table of Contents:
 - Section 1: Overview
 - Section 2: Planning
-- Section 3: Set-up and Run Locally
+- Section 3: Mac Deployment
 - Section 4: UX Discussion
 
 ## Section 1: Overview
@@ -53,7 +53,7 @@
   8. Test the API using tools like Insomnia to make GraphQL calls.
   9. Share the demo in a GitHub repository and be ready to demonstrate it in a technical interview.
 
-## Section 3: Set-up and Run Locally
+## Section 3: Mac Deployment
 <p>To run this repository locally follow the steps below in your terminal (Note that these steps are valid for macOS details some installation steps may be different for Linux distros and Windows OS).</p>
 
 __Set up and Launch Steps:__
