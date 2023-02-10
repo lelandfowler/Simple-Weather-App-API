@@ -18,9 +18,11 @@ def get_weather_data(
         request_date: date = date.today() + timedelta(days=1)
 ):
     """
-    :param city_name:
+    :param city_name: name of city to query from the open weather api, not case-sensitive,
+    must match exact spelling of city name in english
     :param request_date: Constrained to be within 1-3 days of the current date
-    :return: a dictionary with datetime as the key and the value as a dictionary of parameters and values
+    :return: a dictionary with datetime as the key and the value as a dictionary
+    of parameters and values
     {
         date_time: {
             temperature: float
