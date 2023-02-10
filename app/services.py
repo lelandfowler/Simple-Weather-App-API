@@ -31,21 +31,30 @@ class DateModel(BaseModel):
         return v
 
 
-def pull_weather_data(city_name: str, request_date: date):
+def time_point_calculation(request_date: date):
     current_date = date.today()
     date_delta = request_date - current_date
     forcast_days = date_delta.days
-    time_point_increment_hrs = 3
-    time_points_per_day = floor(24 / time_point_increment_hrs)
-    initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
 
-    total_count = forcast_days * time_points_per_day - initial_offset
-    last_time_point_index = total_count - 1
-    if last_time_point_index >= time_points_per_day:
-        first_time_point_index = last_time_point_index - time_points_per_day
+    if forcast_days <= 0:
+        return 0, 0, 0
     else:
-        first_time_point_index = 0
+        time_point_increment_hrs = 3
+        time_points_per_day = floor(24 / time_point_increment_hrs)
+        initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
 
+        total_count = forcast_days * time_points_per_day - initial_offset
+        last_time_point_index = total_count - 1
+
+        if last_time_point_index >= time_points_per_day:
+            first_time_point_index = last_time_point_index - time_points_per_day
+        else:
+            first_time_point_index = 0
+
+        return first_time_point_index, last_time_point_index, total_count
+
+
+def call_weather_api(city_name, total_count):
     units = "Imperial"
     API_KEY = config('API_KEY')
 
@@ -71,6 +80,12 @@ def pull_weather_data(city_name: str, request_date: date):
             ]
         )
     return request.json()
+
+
+def pull_weather_data(city_name: str, request_date: date):
+    first_time_point_index, last_time_point_index, total_count \
+        = time_point_calculation(request_date)
+    day_range_data = call_weather_api(city_name, total_count)
 
 
 def clean_weather_data(json_data: Dict):
