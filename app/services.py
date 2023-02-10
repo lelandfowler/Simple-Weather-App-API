@@ -1,4 +1,5 @@
 import json
+from math import floor
 from typing import Dict
 
 import requests
@@ -34,16 +35,30 @@ def pull_weather_data(city_name: str, request_date: date):
     current_date = date.today()
     date_delta = request_date - current_date
     forcast_days = date_delta.days
+    time_point_increment_hrs = 3
+    time_points_per_day = floor(24 / time_point_increment_hrs)
+    initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
+
+    total_count = forcast_days * time_points_per_day - initial_offset
+    last_time_point_index = total_count - 1
+    if last_time_point_index >= time_points_per_day:
+        first_time_point_index = last_time_point_index - time_points_per_day
+    else:
+        first_time_point_index = 0
+
     units = "Imperial"
     API_KEY = config('API_KEY')
 
-    endpoint = f"http://api.openweathermap.org/data/2.5/forecast?q=" \
-               f"{city_name}&" \
-               f"appid={API_KEY}&" \
-               f"units={units}&" \
-               f"cnt={forcast_days}"
+    params = {
+        "q": city_name,
+        "appid": API_KEY,
+        "units": units,
+        "cnt": total_count,
+    }
 
-    request = requests.get(url=endpoint)
+    endpoint = f"http://api.openweathermap.org/data/2.5/forecast"
+
+    request = requests.get(url=endpoint, params=params)
 
     if request.status_code != 200:
         # Pass exceptions in the weather api call through
@@ -60,4 +75,3 @@ def pull_weather_data(city_name: str, request_date: date):
 
 def clean_weather_data(json_data: Dict):
     return json_data
-
