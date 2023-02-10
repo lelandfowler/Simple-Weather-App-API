@@ -35,20 +35,22 @@ def time_point_calculation(request_date: date):
     date_delta = request_date - current_date
     forcast_days = date_delta.days
 
+    time_point_increment_hrs = 3
+    time_points_per_day = floor(24 / time_point_increment_hrs)
+    initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
+    array_offset = 1
+
+
     if forcast_days <= 0:
         raise ValueError("The request_date must be at least one day from the current_date.")
+
+    last_time_point_index = forcast_days * time_points_per_day - initial_offset - array_offset
+    if forcast_days > 1:
+        first_time_point_index = last_time_point_index - time_points_per_day
     else:
-        time_point_increment_hrs = 3
-        time_points_per_day = floor(24 / time_point_increment_hrs)
-        initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
-        last_time_point_index = forcast_days * time_points_per_day - initial_offset
+        first_time_point_index = 0
 
-        if last_time_point_index >= time_points_per_day:
-            first_time_point_index = last_time_point_index - time_points_per_day
-        else:
-            first_time_point_index = 0
-
-        return first_time_point_index, last_time_point_index
+    return first_time_point_index, last_time_point_index
 
 
 def call_weather_api(city_name, total_count):
