@@ -5,28 +5,10 @@ import requests
 from decouple import config
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
-from datetime import date, timedelta, datetime
-
-
-class User(BaseModel):
-    favorites: List[str] = []
-    timestamp: str = str(datetime.now())
-
-
-class TimePointData(BaseModel):
-    time_point: str
-    humidity: int
-    temperature: float
-
-
-class WeatherData(BaseModel):
-    city: str
-    time_points: List[TimePointData]
-    timestamp: str = str(datetime.now())
-
-
-class FavoriteLocationData(BaseModel):
-    data: Dict[str, WeatherData] = {}
+from datetime import date, timedelta
+import strawberry
+from strawberry.fastapi import GraphQLRouter
+from app.models.models import TimePointData
 
 
 class DateModel(BaseModel):
