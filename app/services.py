@@ -1,7 +1,6 @@
 import json
 from math import floor
 from typing import Dict
-
 import requests
 from decouple import config
 from fastapi import HTTPException
@@ -42,10 +41,9 @@ def time_point_calculation(request_date: date):
         time_point_increment_hrs = 3
         time_points_per_day = floor(24 / time_point_increment_hrs)
         initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
-
         total_count = forcast_days * time_points_per_day - initial_offset
-        last_time_point_index = total_count - 1
 
+        last_time_point_index = total_count - 1
         if last_time_point_index >= time_points_per_day:
             first_time_point_index = last_time_point_index - time_points_per_day
         else:
@@ -82,10 +80,17 @@ def call_weather_api(city_name, total_count):
     return request.json()
 
 
+def isolate_day_data(day_range_data, first_time_point_index, last_time_point_index):
+    time_points = day_range_data["list"]
+    return time_points[first_time_point_index:last_time_point_index]
+
+
 def pull_weather_data(city_name: str, request_date: date):
     first_time_point_index, last_time_point_index, total_count \
         = time_point_calculation(request_date)
     day_range_data = call_weather_api(city_name, total_count)
+    single_day_data = isolate_day_data(day_range_data, first_time_point_index, last_time_point_index)
+    return single_day_data
 
 
 def clean_weather_data(json_data: Dict):
