@@ -41,15 +41,14 @@ def time_point_calculation(request_date: date):
         time_point_increment_hrs = 3
         time_points_per_day = floor(24 / time_point_increment_hrs)
         initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
-        total_count = forcast_days * time_points_per_day - initial_offset
+        last_time_point_index = forcast_days * time_points_per_day - initial_offset
 
-        last_time_point_index = total_count - 1
         if last_time_point_index >= time_points_per_day:
             first_time_point_index = last_time_point_index - time_points_per_day
         else:
             first_time_point_index = 0
 
-        return first_time_point_index, last_time_point_index, total_count
+        return first_time_point_index, last_time_point_index
 
 
 def call_weather_api(city_name, total_count):
@@ -86,9 +85,9 @@ def isolate_day_data(day_range_data, first_time_point_index, last_time_point_ind
 
 
 def pull_weather_data(city_name: str, request_date: date):
-    first_time_point_index, last_time_point_index, total_count \
+    first_time_point_index, last_time_point_index \
         = time_point_calculation(request_date)
-    day_range_data = call_weather_api(city_name, total_count)
+    day_range_data = call_weather_api(city_name, last_time_point_index)
     single_day_data = isolate_day_data(day_range_data, first_time_point_index, last_time_point_index)
     return single_day_data
 
