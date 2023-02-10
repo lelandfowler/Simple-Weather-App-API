@@ -1,19 +1,18 @@
 from datetime import date, timedelta
 from fastapi import FastAPI
 from app.services import DateModel, clean_weather_data, pull_weather_data
-
 import uvicorn
 
 app = FastAPI()
 
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
 
 @app.get("/{city_name}")
-def get_weather_data(
+async def get_weather_data(
         city_name: str,
         request_date: date = date.today() + timedelta(days=1)
 ):
