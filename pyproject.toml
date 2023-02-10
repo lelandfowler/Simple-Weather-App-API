@@ -12,6 +12,7 @@ fastapi = "^0.90.0"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
 pytest = "^7.2.1"
 httpx = "^0.23.3"
+strawberry-graphql = "^0.156.2"
 
 
 [build-system]
