@@ -86,4 +86,11 @@ def pull_weather_data(city_name: str, request_date: date):
 
 
 def clean_weather_data(json_data: Dict):
-    return json_data
+    output = {}
+    for time_point_data in json_data:
+        time_stamp = time_point_data['dt_txt']
+        output[time_stamp] = {
+            'temp': time_point_data['main']['temp'],
+            'humidity': time_point_data['main']['humidity'],
+        }
+    return output
