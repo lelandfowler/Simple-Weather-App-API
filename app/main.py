@@ -1,13 +1,10 @@
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from fastapi import FastAPI
+from app.config.user_config import users
 from app.services import get_weather, DateModel, User, FavoriteLocationData
 import uvicorn
 
 app = FastAPI()
-
-users = {'user_1': User(favorites=['Austin', 'Chicago', 'New York']),
-         'user_2': User(favorites=['Tulsa', 'Dublin', 'Paris']),
-         'user_3': User(favorites=['Honolulu', 'Tokyo', 'London'])}
 
 
 @app.get("/user")
