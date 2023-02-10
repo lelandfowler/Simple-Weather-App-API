@@ -1,12 +1,35 @@
-import json
 from typing import Dict
 from decouple import config
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, validator
+import json
 import requests
 import uvicorn
-from fastapi import FastAPI, Query, Path, HTTPException
 
 app = FastAPI()
+
+
+class Date_Model(BaseModel):
+    date: date
+
+    @validator("date")
+    def validate_date(cls, v):
+        if v <= date.today() or v > date.today() + timedelta(days=3):
+            raise HTTPException(
+                status_code=400,
+                detail=[
+                    {
+                        "loc": [
+                            "query",
+                            "request_date"
+                        ],
+                        "msg": "Date should be within the last year and today.",
+                        "type": "value_error.date"
+                    }
+                ]
+            )
+        return v
 
 
 def clean_weather_data(json_data: Dict):
@@ -21,10 +44,7 @@ def read_root():
 @app.get("/{city_name}")
 def get_weather_data(
         city_name: str,
-        request_date: date = Query(
-            None,
-            description="The date that user would like to see data for.",
-        )
+        request_date: date = date.today() + timedelta(days=1)
 ):
     """
     :param city_name:
@@ -37,6 +57,10 @@ def get_weather_data(
         }
     }
     """
+
+    # Validate the Date Input
+    Date_Model.parse_obj({"date": request_date})
+
     current_date = date.today()
     date_delta = request_date - current_date
     forcast_days = date_delta.days
@@ -52,7 +76,14 @@ def get_weather_data(
     request = requests.get(url=endpoint)
     if request.status_code != 200:
         # Pass exceptions in the weather api call through
-        raise HTTPException(status_code=request.status_code, detail=json.loads(request.text))
+        raise HTTPException(
+            status_code=request.status_code,
+            detail=[
+                {
+                    "msg": json.loads(request.text)["message"],
+                }
+            ]
+        )
     data = request.json()
     result = clean_weather_data(data)
     return result
