@@ -36,7 +36,7 @@ def time_point_calculation(request_date: date):
     forcast_days = date_delta.days
 
     if forcast_days <= 0:
-        return 0, 0, 0
+        raise ValueError("The request_date must be at least one day from the current_date.")
     else:
         time_point_increment_hrs = 3
         time_points_per_day = floor(24 / time_point_increment_hrs)
