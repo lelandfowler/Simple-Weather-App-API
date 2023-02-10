@@ -6,12 +6,7 @@ import uvicorn
 app = FastAPI()
 
 
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/{city_name}")
+@app.get("/weather_forcast")
 async def get_weather_data(
         city_name: str,
         request_date: date = date.today() + timedelta(days=1)

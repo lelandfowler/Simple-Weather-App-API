@@ -5,12 +5,6 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_read_main():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {'Hello': 'World'}
-
-
 def test_get_weather_data():
     params = {
         "request_date": str(date.today() + timedelta(1))
