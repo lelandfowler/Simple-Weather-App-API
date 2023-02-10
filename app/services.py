@@ -1,11 +1,32 @@
 import json
 from math import floor
-from typing import Dict
+from typing import Dict, List
 import requests
 from decouple import config
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+
+
+class User(BaseModel):
+    favorites: List[str] = []
+    timestamp: str = str(datetime.now())
+
+
+class TimePointData(BaseModel):
+    time_point: str
+    humidity: int
+    temperature: float
+
+
+class WeatherData(BaseModel):
+    city: str
+    time_points: List[TimePointData]
+    timestamp: str = str(datetime.now())
+
+
+class FavoriteLocationData(BaseModel):
+    data: Dict[str, WeatherData] = {}
 
 
 class DateModel(BaseModel):
@@ -78,7 +99,7 @@ def isolate_day_data(request_data, request_date):
     return day_data
 
 
-def pull_weather_data(city_name: str, request_date: date):
+def pull_raw_weather_data(city_name: str, request_date: date):
     total_count = time_point_calculation(request_date)
     day_range_data = call_weather_api(city_name, total_count)
     single_day_data = isolate_day_data(day_range_data, request_date)
@@ -86,11 +107,20 @@ def pull_weather_data(city_name: str, request_date: date):
 
 
 def clean_weather_data(json_data: Dict):
-    output = {}
+    time_points = []
     for time_point_data in json_data:
-        time_stamp = time_point_data['dt_txt']
-        output[time_stamp] = {
-            'temp': time_point_data['main']['temp'],
-            'humidity': time_point_data['main']['humidity'],
-        }
-    return output
+        time_point = time_point_data['dt_txt']
+        time_points.append(
+            TimePointData(
+                time_point=time_point,
+                humidity=time_point_data['main']['humidity'],
+                temperature=time_point_data['main']['temp']
+            )
+        )
+    return time_points
+
+
+def get_weather(city_name, request_date):
+    raw_weather_data = pull_raw_weather_data(city_name, request_date)
+    clean_weather = clean_weather_data(raw_weather_data)
+    return clean_weather
