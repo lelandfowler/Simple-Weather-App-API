@@ -37,7 +37,6 @@ def time_point_calculation(request_date: date):
 
     time_point_increment_hrs = 3
     time_points_per_day = floor(24 / time_point_increment_hrs)
-    initial_offset = 1  # The weather API excludes the 0 hour time-point for the first day
 
     if forcast_days <= 0:
         raise ValueError("The request_date must be at least one day from the current_date.")
