@@ -10,7 +10,7 @@ import uvicorn
 app = FastAPI()
 
 
-class Date_Model(BaseModel):
+class DateModel(BaseModel):
     date: date
 
     @validator("date")
@@ -53,13 +53,13 @@ def get_weather_data(
     {
         date_time: {
             temperature: float
-            humidity: int (0,100)
+            humidity: int
         }
     }
     """
 
     # Validate the Date Input
-    Date_Model.parse_obj({"date": request_date})
+    DateModel.parse_obj({"date": request_date})
 
     current_date = date.today()
     date_delta = request_date - current_date
