@@ -3,11 +3,6 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class User(BaseModel):
-    favorites: List[str] = []
-    timestamp: str = str(datetime.now())
-
-
 class TimePointData(BaseModel):
     time_point: str
     humidity: int

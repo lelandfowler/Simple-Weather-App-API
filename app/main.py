@@ -1,12 +1,14 @@
 from datetime import date, timedelta
 from fastapi import FastAPI
 from app.config.user_config import users
-from app.models.models import User, FavoriteLocationData
-from app.services import get_weather, DateModel
+from app.models.user_models import User
+from app.models.weather_models import FavoriteLocationData
+
+from app.services.services import get_weather, DateModel
 import uvicorn
 
-
 app = FastAPI()
+
 
 @app.get("/user")
 async def create_user(uid: str):

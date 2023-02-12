@@ -1,4 +1,4 @@
-from app.models.models import User
+from app.models.user_models import User
 
 users = {'user_1': User(favorites=['Austin', 'Chicago', 'New York']),
          'user_2': User(favorites=['Tulsa', 'Dublin', 'Paris']),

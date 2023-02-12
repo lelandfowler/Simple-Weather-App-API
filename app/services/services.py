@@ -6,7 +6,7 @@ from decouple import config
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
 from datetime import date, timedelta
-from app.models.models import TimePointData
+from app.models.weather_models import TimePointData
 
 
 class DateModel(BaseModel):
