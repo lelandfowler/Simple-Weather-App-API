@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from app.config.user_config import users
 from app.models.user_models import User
 from app.models.weather_models import FavoriteLocationData
-
 from app.services.services import get_weather, DateModel
 import uvicorn
 
