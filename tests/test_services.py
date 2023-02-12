@@ -1,6 +1,8 @@
 from datetime import timedelta, date
 import pytest
 from fastapi import HTTPException
+
+from app.models.models import TimePointData
 from app.services import time_point_calculation, DateModel, call_weather_api, isolate_day_data, clean_weather_data
 
 
@@ -70,15 +72,34 @@ def test_isolate_day_data():
 
 def test_clean_weather_data():
     input_data = [
-        {'dt': 1676073600, 'main': {'temp': 44.76, 'feels_like': 41.86, 'temp_min': 44.76, 'temp_max': 44.76, 'pressure': 1036, 'sea_level': 1036, 'grnd_level': 1033, 'humidity': 94, 'temp_kf': 0}, 'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}], 'clouds': {'all': 100}, 'wind': {'speed': 5.3, 'deg': 242, 'gust': 15.73}, 'visibility': 10000, 'pop': 0, 'sys': {'pod': 'n'}, 'dt_txt': '2023-02-11 00:00:00'},
-        {'dt': 1676084400, 'main': {'temp': 44.96, 'feels_like': 42.39, 'temp_min': 44.96, 'temp_max': 44.96, 'pressure': 1035, 'sea_level': 1035, 'grnd_level': 1032, 'humidity': 92, 'temp_kf': 0}, 'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}], 'clouds': {'all': 100}, 'wind': {'speed': 4.88, 'deg': 259, 'gust': 14.41}, 'visibility': 10000, 'pop': 0, 'sys': {'pod': 'n'}, 'dt_txt': '2023-02-11 03:00:00'},
+        {
+            'dt': 1676073600,
+            'main': {
+                'temp': 44.76, 'feels_like': 41.86, 'temp_min': 44.76,
+                'temp_max': 44.76, 'pressure': 1036, 'sea_level': 1036,
+                'grnd_level': 1033, 'humidity': 94, 'temp_kf': 0
+            },
+            'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}],
+            'clouds': {'all': 100}, 'wind': {'speed': 5.3, 'deg': 242, 'gust': 15.73},
+            'visibility': 10000, 'pop': 0, 'sys': {'pod': 'n'}, 'dt_txt': '2023-02-11 00:00:00'
+        },
+        {
+            'dt': 1676084400,
+            'main': {
+                'temp': 44.96, 'feels_like': 42.39, 'temp_min': 44.96,
+                'temp_max': 44.96, 'pressure': 1035, 'sea_level': 1035,
+                'grnd_level': 1032, 'humidity': 92, 'temp_kf': 0
+            },
+            'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}],
+            'clouds': {'all': 100}, 'wind': {'speed': 4.88, 'deg': 259, 'gust': 14.41},
+            'visibility': 10000, 'pop': 0, 'sys': {'pod': 'n'}, 'dt_txt': '2023-02-11 03:00:00'
+        },
     ]
 
-    correct_output_data = {
-        '2023-02-11 00:00:00': {'temp': 44.76, 'humidity': 94},
-        '2023-02-11 03:00:00': {'temp': 44.96, 'humidity': 92},
-    }
-
+    correct_output_data = [
+        TimePointData(time_point='2023-02-11 00:00:00', temperature=44.76, humidity=94),
+        TimePointData(time_point='2023-02-11 03:00:00', temperature=44.96, humidity=92),
+    ]
     assert clean_weather_data(input_data) == correct_output_data
 
 
@@ -101,3 +122,23 @@ def test_date_model_allows_dates_within_range(good_request_dates):
 def test_data_model_dates_catches_out_of_range_dates(bad_request_dates):
     with pytest.raises(HTTPException):
         DateModel.parse_obj({"date": bad_request_dates})
+
+# @strawberry.type
+# class Query:
+#     @strawberry.field
+#     async def create_user(self, uid: str) -> Dict[str, any]:
+#         matching_list = [user for user in users if uid == user]
+#         if len(matching_list) == 1:
+#             user = users[uid]
+#             return {"message": {uid: user}}
+#         else:
+#             return {"message": f"User, {uid}, does not exist."}
+#
+#
+# schema = strawberry.Schema(Query)
+# graphql_app = GraphQLRouter(schema)
+#
+# app = FastAPI()
+# app.include_router(graphql_app, prefix="/graphql")
+
+#############

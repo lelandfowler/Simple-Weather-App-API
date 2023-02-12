@@ -7,8 +7,8 @@ client = TestClient(app)
 
 def test_get_weather_data():
     params = {
+        "city_name": "Los Angeles",
         "request_date": str(date.today() + timedelta(1))
     }
-    city_name = 'Los Angeles'
-    response = client.get(f"/{city_name}", params=params)
+    response = client.get(f"/weather_forecast", params=params)
     assert response.status_code == 200

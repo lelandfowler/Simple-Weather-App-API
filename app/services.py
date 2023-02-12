@@ -1,13 +1,11 @@
 import json
 from math import floor
-from typing import Dict, List
+from typing import List
 import requests
 from decouple import config
 from fastapi import HTTPException
 from pydantic import BaseModel, validator
 from datetime import date, timedelta
-import strawberry
-from strawberry.fastapi import GraphQLRouter
 from app.models.models import TimePointData
 
 
@@ -25,7 +23,7 @@ class DateModel(BaseModel):
                             "query",
                             "request_date"
                         ],
-                        "msg": "Date should be within the last year and today.",
+                        "msg": "Date should be within 1-3 days of the current date.",
                         "type": "value_error.date"
                     }
                 ]
@@ -88,7 +86,7 @@ def pull_raw_weather_data(city_name: str, request_date: date):
     return single_day_data
 
 
-def clean_weather_data(json_data: Dict):
+def clean_weather_data(json_data: List):
     time_points = []
     for time_point_data in json_data:
         time_point = time_point_data['dt_txt']
