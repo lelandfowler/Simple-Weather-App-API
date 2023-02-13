@@ -99,7 +99,7 @@ class Query:
     def user(self, user_id: str) -> Union[User, Message]:
         favorites = user_dict.get(user_id)
         return User(user_id=user_id, favorites=favorites) \
-            if favorites else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
+            if user_id in user_dict else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
 
     @strawberry.field
     def users(self) -> List[User]:
