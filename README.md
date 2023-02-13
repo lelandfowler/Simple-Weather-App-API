@@ -1,11 +1,10 @@
 # Simple-Weather-App-API
-<p>I've built an API that serves temperature and humidity to the client based on a date and location provided.</p>
+<p>A simple API that serves temperature and humidity to the client based on a date and location provided.</p>
 
 ## Table of Contents:
 - Section 1: Overview
-- Section 2: Planning
-- Section 3: Mac Deployment
-- Section 4: UX Discussion
+- Section 2: Mac Deployment
+- Section 3: Coming Soon
 
 ## Section 1: Overview
 This API is built utilizing FastAPI as the API framework and Uvicorn as the ASGI server.</p>
@@ -19,6 +18,10 @@ Poetry is employed for dependency management.
 Testing is performed through the Pytest library.
 
 Recommended Python Version: 3.7.16
+
+To employ the Strawberry GraphQL query environment navigate to localhost: http://127.0.0.1:8000/graphql
+
+Note: localhost can be used in place of 127.0.0.1
 
 ### Inputs:
 1. Date
@@ -41,24 +44,7 @@ Recommended Python Version: 3.7.16
 - Requirements: [CZero Technical Assessment](https://czerotoday.notion.site/Technical-Assessment-cc5f624c821249d7917a81f112f1e043)<br>
 
 
-
-## Section 2: Planning
-
-### To do list:
-  1. Find a weather API provider to retrieve the weather data.
-     1. [Open Meteo](https://open-meteo.com) <br>
-     or
-     2. [Open Weather Map](https://openweathermap.org/api) < Currently preferred
-  2. Use the FastAPI framework to build the API
-  3. Use Strawberry for graphql to handle the GraphQL queries and mutations.
-  4. Implement a GraphQL query for weather information by city and date, including data on temperature and humidity by time. Consider carefully the data type for the output.
-  5. Implement a GraphQL mutation for saving favorite locations.
-  6. Implement a GraphQL query for retrieving the weather from favorite locations.
-  7. Use MongoDB (using ODMantic) as the datastore.
-  8. Test the API using tools like Insomnia to make GraphQL calls.
-  9. Share the demo in a GitHub repository and be ready to demonstrate it in a technical interview.
-
-## Section 3: Mac Deployment
+## Section 2: Mac Deployment
 <p>To run this repository locally follow the steps below in your terminal (Note that these steps are valid for macOS details some installation steps may be different for Linux distros and Windows OS).</p>
 
 
@@ -78,7 +64,84 @@ __Set up and Launch Steps:__
 12. Now the API can be started using Uvicorn: ```$ uvicorn app.main:app --reload```
 13. Details of the Uvicorn autoload behavior can be found here: https://www.uvicorn.org/settings/
 14. If Uvicorn successfully starts then the "Application startup complete." message will appear in the terminal a link to the api landing page will be shown above it (defaulting to:  http://127.0.0.1:8000)
+15. Navigate to the strawbery graphql environment to query the api: http://127.0.0.1:8000/graphql
+
+Here is a sample graphql query to get a user: 
+```
+    query GetOneUser {
+      user(userId: "user_1") {
+        ... on User {
+          userId
+          favorites
+          creationAt
+          lastUpdated
+        }
+        ... on Message {
+          message
+        }
+      }
+    }
+```
+
+To get all users:
+```
+    query GetAllUsers {
+      users {
+        favorites
+        userId
+      }
+    }
+```
+
+to create a user:
+```
+    mutation CreateUser {
+      createUser(userId: "user_1") {
+        message
+      }
+    }
+```
+
+to add to a users favorites:
+```
+    mutation AddFavorite{
+      addFavorite(userId:"user_1", 
+        newFavorite:"Frimp"){
+        message
+      }
+    }
+```
+
+and to get the weather data for all of a user's favorites:
+```
+    query GetFavForcast {
+      getFavoriteForcast(userId: "user_1", requestDate: "2023-02-14") {
+        ... on Message {
+          __typename
+          message
+        }
+        ... on FavoriteLocationData {
+          __typename
+          data {
+            city
+            creationAt
+            lastUpdated
+            timePoints {
+              humidity
+              temperature
+              timePoint
+            }
+          }
+        }
+      }
+    }
+```
 
 __Testing__: Testing can be performed by utilizing Pytest, as described in the [pytest documentation](https://docs.pytest.org/en/7.1.x/how-to/usage.html).
 
-## Section 4: UX Discussion
+## Section 3: Coming Soon
+The following items will be addressed to improve this application at a later date:
+1. Integrate MongoDB for holding the user list
+2. Add a Cache (Redis) for commonly requested cities
+3. Add Deployment instructions for Linus
+4. Handle HTTP exceptions with the data source API more comprehensively.
