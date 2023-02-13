@@ -13,9 +13,9 @@ class TimePointData:
 @strawberry.type
 class WeatherData:
     city: str
-    time_points: List[TimePointData]
-    creation_at: str = str(datetime.now())
-    last_updated: str = creation_at
+    timePoints: List[TimePointData]
+    createdAt: str = str(datetime.now())
+    updatedAt: str = createdAt
 
 
 @strawberry.type
