@@ -1,7 +1,5 @@
-from typing import Dict, List
-
+from typing import List
 import strawberry
-from pydantic import BaseModel
 from datetime import datetime
 
 

@@ -1,12 +1,12 @@
-from datetime import date, timedelta
+# from datetime import date, timedelta
+# from app.config.user_config import users
+# from app.models.user_models import User
+# from app.models.weather_models import FavoriteLocationData
+# from app.services.services import get_weather, DateModel
+import strawberry
 from fastapi import FastAPI
-from app.config.user_config import users
-from app.models.user_models import User
-from app.models.weather_models import FavoriteLocationData
-from app.services.services import get_weather, DateModel
+from strawberry.fastapi import GraphQLRouter
 import uvicorn
-
-app = FastAPI()
 
 
 # @app.get("/user")
@@ -91,7 +91,21 @@ app = FastAPI()
 #
 #     weather = get_weather(city_name, request_date)
 #     return weather
+@strawberry.type
+class Query:
+    pass
 
+
+@strawberry.type
+class Mutation:
+    pass
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)
+graphql_app = GraphQLRouter(schema)
+
+app = FastAPI()
+app.include_router(graphql_app, prefix="/graphql")
 
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=8000)
