@@ -2,14 +2,16 @@ from datetime import timedelta, date
 import pytest
 from fastapi import HTTPException
 
-from app.models.models import TimePointData
-from app.services import time_point_calculation, DateModel, call_weather_api, isolate_day_data, clean_weather_data
+from app.models.utility_models import Message
+from app.models.weather_models import TimePointData
+from app.services.services import time_point_calculation, call_weather_api, isolate_day_data, clean_weather_data, \
+    validate_date
 
 
 @pytest.mark.parametrize("days_from_today, expected_result", [
-    (1, 8),
-    (2, 16),
-    (3, 24),
+    (1, 16),
+    (2, 24),
+    (3, 32),
 ])
 def test_time_point_calculation(days_from_today, expected_result):
     test_date = date.today() + timedelta(days_from_today)
@@ -108,9 +110,9 @@ def test_clean_weather_data():
     date.today() + timedelta(2),
     date.today() + timedelta(3),
 ])
-def test_date_model_allows_dates_within_range(good_request_dates):
+def test_validate_date_allows_dates_within_range(good_request_dates):
     try:
-        DateModel.parse_obj({"date": good_request_dates})
+        validate_date(good_request_dates)
     except Exception as e:
         pytest.fail(f"Unexpected Error: {e}")
 
@@ -119,26 +121,6 @@ def test_date_model_allows_dates_within_range(good_request_dates):
     date.today() - timedelta(1),
     date.today() + timedelta(4),
 ])
-def test_data_model_dates_catches_out_of_range_dates(bad_request_dates):
-    with pytest.raises(HTTPException):
-        DateModel.parse_obj({"date": bad_request_dates})
-
-# @strawberry.type
-# class Query:
-#     @strawberry.field
-#     async def create_user(self, uid: str) -> Dict[str, any]:
-#         matching_list = [user for user in users if uid == user]
-#         if len(matching_list) == 1:
-#             user = users[uid]
-#             return {"message": {uid: user}}
-#         else:
-#             return {"message": f"User, {uid}, does not exist."}
-#
-#
-# schema = strawberry.Schema(Query)
-# graphql_app = GraphQLRouter(schema)
-#
-# app = FastAPI()
-# app.include_router(graphql_app, prefix="/graphql")
-
-#############
+def test_validate_date_catches_out_of_range_dates(bad_request_dates):
+    out_of_range_message = Message(message=f"Date should be within 1-3 days of the current date({date.today()}).")
+    assert validate_date(bad_request_dates) == out_of_range_message
