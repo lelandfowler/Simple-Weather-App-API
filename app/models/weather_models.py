@@ -1,19 +1,25 @@
 from typing import Dict, List
+
+import strawberry
 from pydantic import BaseModel
 from datetime import datetime
 
 
-class TimePointData(BaseModel):
+@strawberry.type
+class TimePointData:
     time_point: str
     humidity: int
     temperature: float
 
 
-class WeatherData(BaseModel):
+@strawberry.type
+class WeatherData:
     city: str
     time_points: List[TimePointData]
-    timestamp: str = str(datetime.now())
+    creation_at: str = str(datetime.now())
+    last_updated: str = creation_at
 
 
-class FavoriteLocationData(BaseModel):
-    data: Dict[str, WeatherData] = {}
+@strawberry.type
+class FavoriteLocationData:
+    data: List[WeatherData]
