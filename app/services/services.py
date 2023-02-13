@@ -18,7 +18,7 @@ def validate_date(input_date):
 def time_point_calculation(request_date: date):
     current_date = date.today()
     date_delta = request_date - current_date
-    forcast_days = date_delta.days
+    forcast_days = date_delta.days + 1
 
     time_point_increment_hrs = 3
     time_points_per_day = floor(24 / time_point_increment_hrs)
