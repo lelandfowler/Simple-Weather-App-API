@@ -4,31 +4,15 @@ from typing import List
 import requests
 from decouple import config
 from fastapi import HTTPException
-from pydantic import BaseModel, validator
 from datetime import date, timedelta
-from app.models.weather_models import TimePointData
+from app.models.utility_models import Message
+from app.models.weather_models import TimePointData, WeatherData
 
 
-class DateModel(BaseModel):
-    date: date
-
-    @validator("date")
-    def validate_date(cls, v):
-        if v <= date.today() or v > date.today() + timedelta(days=3):
-            raise HTTPException(
-                status_code=400,
-                detail=[
-                    {
-                        "loc": [
-                            "query",
-                            "request_date"
-                        ],
-                        "msg": "Date should be within 1-3 days of the current date.",
-                        "type": "value_error.date"
-                    }
-                ]
-            )
-        return v
+def validate_date(input_date):
+    if input_date < date.today() + timedelta(days=1) or input_date > date.today() + timedelta(days=3):
+        return Message(message=f"Date should be within 1-3 days of the current date({date.today()}).")
+    return None
 
 
 def time_point_calculation(request_date: date):
@@ -75,7 +59,12 @@ def call_weather_api(city_name, total_count):
 
 def isolate_day_data(request_data, request_date):
     time_points_list = request_data["list"]
-    day_data = [time_stamp for time_stamp in time_points_list if str(request_date) in time_stamp['dt_txt']]
+    day_data = []
+    for time_point in time_points_list:
+        tp_in_data = time_point['dt_txt']
+        if str(request_date) in tp_in_data:
+            day_data.append(time_point)
+    # day_data = [time_point for time_point in time_points_list if str(request_date) in time_point['dt_txt']]
     return day_data
 
 
@@ -102,5 +91,5 @@ def clean_weather_data(json_data: List):
 
 def get_weather(city_name, request_date):
     raw_weather_data = pull_raw_weather_data(city_name, request_date)
-    clean_weather = clean_weather_data(raw_weather_data)
-    return clean_weather
+    time_points = clean_weather_data(raw_weather_data)
+    return WeatherData(city=city_name, time_points=time_points)

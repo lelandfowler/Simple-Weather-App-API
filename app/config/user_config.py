@@ -6,7 +6,7 @@
 
 # Initialize in memory user store with some users that have favorites
 user_dict = {
-    'user_4': ['Austin', 'Chicago', 'New York'],
+    'user_1': ['Austin', 'Chicago', 'New York'],
     'user_2': ['Tulsa', 'Dublin', 'Paris'],
     'user_3': ['Honolulu', 'Tokyo', 'London'],
 }

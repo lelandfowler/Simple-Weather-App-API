@@ -1,10 +1,10 @@
 from datetime import date, timedelta
-from typing import Union, List
+from typing import Union, List, Optional
 from app.config.user_config import user_dict
 from app.models.utility_models import User
 from app.models.utility_models import Message
-from app.models.weather_models import FavoriteLocationData
-from app.services.services import get_weather, DateModel
+from app.models.weather_models import FavoriteLocationData, WeatherData
+from app.services.services import get_weather, validate_date
 import strawberry
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
@@ -93,6 +93,8 @@ import uvicorn
 #
 #     weather = get_weather(city_name, request_date)
 #     return weather
+
+
 @strawberry.type
 class Query:
     @strawberry.field
@@ -104,6 +106,26 @@ class Query:
     @strawberry.field
     def users(self) -> List[User]:
         return [User(user_id=uid, favorites=favorites) for uid, favorites in user_dict.items()]
+
+    @strawberry.field
+    def get_weather_data(
+            self,
+            city_name: str,
+            request_date: Optional[date] = date.today() + timedelta(days=1)
+    ) -> Union[Message, WeatherData]:
+        """
+        :param city_name: name of city to query from the open weather api, not case-sensitive,
+        must match exact spelling of city name in english
+        :param request_date: constrained to be within 1-3 days of the current date
+        :return: WeatherData object
+        """
+        # Validate the Date Input
+        error_message = validate_date(request_date)
+        if error_message:
+            return error_message
+
+        weather = get_weather(city_name, request_date)
+        return weather
 
 
 @strawberry.type
