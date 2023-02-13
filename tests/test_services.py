@@ -2,8 +2,8 @@ from datetime import timedelta, date
 import pytest
 from fastapi import HTTPException
 
-from app.models.utility_models import Message
-from app.models.weather_models import TimePointData
+from app.schemas.utility_models import Message
+from app.schemas.weather_models import TimePointData
 from app.services.services import time_point_calculation, call_weather_api, isolate_day_data, clean_weather_data, \
     validate_date
 

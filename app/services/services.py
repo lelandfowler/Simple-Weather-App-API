@@ -5,8 +5,8 @@ import requests
 from decouple import config
 from fastapi import HTTPException
 from datetime import date, timedelta
-from app.models.utility_models import Message
-from app.models.weather_models import TimePointData, WeatherData
+from app.schemas.utility_schemas import Message
+from app.schemas.weather_schemas import TimePointData, WeatherData
 
 
 def validate_date(input_date):

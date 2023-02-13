@@ -1,13 +1,13 @@
 from datetime import date, timedelta
 from typing import Union, List, Optional
 from app.config.user_config import user_dict
-from app.models.utility_models import User
-from app.models.utility_models import Message
-from app.models.weather_models import FavoriteLocationData, WeatherData
+from app.schemas.input_schemas import WeatherDataInput
+from app.schemas.utility_schemas import User, Message
+from app.schemas.weather_schemas import FavoriteLocationData, WeatherData
 from app.services.services import get_weather, validate_date
-import strawberry
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
+import strawberry
 import uvicorn
 
 
@@ -24,27 +24,20 @@ class Query:
         return [User(user_id=uid, favorites=favorites) for uid, favorites in user_dict.items()]
 
     @strawberry.field
-    def get_weather_data(
+    def getWeatherData(
             self,
-            city_name: str,
-            request_date: Optional[date] = date.today() + timedelta(days=1)
+            input: WeatherDataInput
     ) -> Union[Message, WeatherData]:
-        """
-        :param city_name: name of city to query from the open weather api, not case-sensitive,
-        must match exact spelling of city name in english
-        :param request_date: constrained to be within 1-3 days of the current date
-        :return: WeatherData object
-        """
         # Validate the Date Input
-        error_message = validate_date(request_date)
+        error_message = validate_date(input.request_date)
         if error_message:
             return error_message
 
-        weather = get_weather(city_name, request_date)
+        weather = get_weather(input.city_name, input.request_date)
         return weather
 
     @strawberry.field
-    def get_favorite_forcast(
+    def getFavoriteForcast(
             self,
             user_id: str,
             request_date: date = date.today() + timedelta(days=1)
@@ -62,14 +55,14 @@ class Query:
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    def create_user(self, user_id: str) -> Message:
+    def createUser(self, user_id: str) -> Message:
         if user_id in user_dict:
             return Message(message=f"NOT CREATED: User, {user_id}, already exists.")
         user_dict[user_id] = []
         return Message(message=f"CREATED: User, {user_id}, created.")
 
     @strawberry.mutation
-    def add_favorite(self, user_id: str, new_favorite: str) -> Message:
+    def addFavorite(self, user_id: str, new_favorite: str) -> Message:
         favorites = user_dict.get(user_id)
         if favorites is None:
             return Message(message=f"NOT UPDATED: User, {user_id}, was not found.")
@@ -81,7 +74,7 @@ class Mutation:
                                f"list of favorites: {favorites}")
 
     @strawberry.mutation
-    def delete_favorite(self, user_id: str, favorite: str) -> Message:
+    def deleteFavorite(self, user_id: str, favorite: str) -> Message:
         favorites = user_dict.get(user_id)
         if favorites is None:
             return Message(message=f"User, {user_id}, does not exists.")
