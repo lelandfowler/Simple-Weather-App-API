@@ -1,8 +1,10 @@
-# from datetime import date, timedelta
-# from app.config.user_config import users
-# from app.models.user_models import User
-# from app.models.weather_models import FavoriteLocationData
-# from app.services.services import get_weather, DateModel
+from datetime import date, timedelta
+from typing import Union, List
+from app.config.user_config import user_dict
+from app.models.utility_models import User
+from app.models.utility_models import Message
+from app.models.weather_models import FavoriteLocationData
+from app.services.services import get_weather, DateModel
 import strawberry
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
@@ -93,12 +95,25 @@ import uvicorn
 #     return weather
 @strawberry.type
 class Query:
-    pass
+    @strawberry.field
+    def user(self, user_id: str) -> Union[User, Message]:
+        favorites = user_dict.get(user_id)
+        return User(user_id=user_id, favorites=favorites) \
+            if favorites else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
+
+    @strawberry.field
+    def users(self) -> List[User]:
+        return [User(user_id=uid, favorites=favorites) for uid, favorites in user_dict.items()]
 
 
 @strawberry.type
 class Mutation:
-    pass
+    @strawberry.mutation
+    def create_user(self, user_id: str) -> Message:
+        if user_id in user_dict:
+            return Message(message=f"NOT CREATED: User, {user_id}, already exists.")
+        user_dict[user_id] = []
+        return Message(message=f"CREATED: User, {user_id}, created.")
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
