@@ -127,6 +127,21 @@ class Query:
         weather = get_weather(city_name, request_date)
         return weather
 
+    @strawberry.field
+    def get_favorite_forcast(
+            self,
+            user_id: str,
+            request_date: date = date.today() + timedelta(days=1)
+    ) -> Union[Message, FavoriteLocationData]:
+        # Validate the Date Input
+        error_message = validate_date(request_date)
+        if error_message:
+            return error_message
+
+        favorites = user_dict.get(user_id)
+        weather = [get_weather(favorite, request_date) for favorite in favorites]
+        return FavoriteLocationData(data=weather)
+
 
 @strawberry.type
 class Mutation:
@@ -137,12 +152,36 @@ class Mutation:
         user_dict[user_id] = []
         return Message(message=f"CREATED: User, {user_id}, created.")
 
+    @strawberry.mutation
+    def add_favorite(self, user_id: str, new_favorite: str) -> Message:
+        favorites = user_dict.get(user_id)
+        if favorites is None:
+            return Message(message=f"NOT UPDATED: User, {user_id}, was not found.")
+        if new_favorite not in user_dict[user_id]:
+            user_dict[user_id].append(new_favorite)
+            return Message(message=f"UPDATED: {new_favorite}, has been added to {user_id}'s "
+                                   f"list of favorites: {favorites}")
+        return Message(message=f"NOT UPDATED: {new_favorite}, is already on {user_id}'s "
+                               f"list of favorites: {favorites}")
+
+    @strawberry.mutation
+    def delete_favorite(self, user_id: str, favorite: str) -> Message:
+        favorites = user_dict.get(user_id)
+        if favorites is None:
+            return Message(message=f"User, {user_id}, does not exists.")
+        if favorite in favorites:
+            favorites.remove(favorite)
+            return Message(message=f"Success: {favorite}, has been removed from {user_id}'s "
+                                   f"list of favorites: {favorites}")
+        return Message(message=f"That location is not on the User's, {user_id}, favorites list.")
+
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 graphql_app = GraphQLRouter(schema)
 
 app = FastAPI()
 app.include_router(graphql_app, prefix="/graphql")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=8000)
