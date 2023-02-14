@@ -5,10 +5,10 @@ from datetime import datetime
 
 @strawberry.type
 class User:
-    user_id: str
+    userId: str
     favorites: Optional[List[str]]
-    creation_at: str = str(datetime.now())
-    last_updated: str = creation_at
+    createdAt: str = str(datetime.now())
+    updatedAt: str = createdAt
 
 
 @strawberry.type
