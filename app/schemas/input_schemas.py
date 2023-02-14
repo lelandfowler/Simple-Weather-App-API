@@ -22,6 +22,6 @@ class AddFavoriteInput:
 
 
 @strawberry.input
-class DeleteFavoriteInput():
+class DeleteFavoriteInput:
     userId: str
     exFavorite: str
