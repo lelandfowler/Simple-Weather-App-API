@@ -4,7 +4,6 @@ from app.schemas.input_schemas import WeatherDataInput, FavoriteForcastInput, Ad
 from app.schemas.utility_schemas import User, Message
 from app.schemas.weather_schemas import FavoriteLocationData, WeatherData
 from app.services.services import get_weather, validate_date
-from typing import List
 from pymongo import MongoClient
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
@@ -21,7 +20,7 @@ class Query:
     @strawberry.field
     def user(self, user_id: str) -> Union[User, Message]:
         favorites = user_dict.get(user_id)
-        return User(user_id=user_id, favorites=favorites) \
+        return User(userId=user_id, favorites=favorites) \
             if user_id in user_dict else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
 
     @strawberry.field
@@ -36,11 +35,11 @@ class Query:
             input: WeatherDataInput
     ) -> Union[Message, WeatherData]:
         # Validate the Date Input
-        error_message = validate_date(input.request_date)
+        error_message = validate_date(input.requestDate)
         if error_message:
             return error_message
 
-        weather = get_weather(input.city_name, input.request_date)
+        weather = get_weather(input.cityName, input.requestDate)
         return weather
 
     @strawberry.field
@@ -49,12 +48,12 @@ class Query:
             input: FavoriteForcastInput
     ) -> Union[Message, FavoriteLocationData]:
         # Validate the Date Input
-        error_message = validate_date(input.request_date)
+        error_message = validate_date(input.requestDate)
         if error_message:
             return error_message
 
         favorites = user_dict.get(input.userId)
-        weather = [get_weather(favorite, input.request_date) for favorite in favorites]
+        weather = [get_weather(favorite, input.requestDate) for favorite in favorites]
         return FavoriteLocationData(data=weather)
 
 
