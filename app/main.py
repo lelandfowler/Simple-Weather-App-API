@@ -1,6 +1,6 @@
 from typing import Union, List
-from app.config.user_config import user_dict
-from app.schemas.input_schemas import WeatherDataInput, FavoriteForcastInput, AddFavoriteInput, DeleteFavoriteInput
+from app.schemas.input_schemas import WeatherDataInput, FavoriteForcastInput, AddFavoriteInput, DeleteFavoriteInput, \
+    CreateUserInput
 from app.schemas.utility_schemas import User, Message
 from app.schemas.weather_schemas import FavoriteLocationData, WeatherData
 from app.services.services import get_weather, validate_date
@@ -14,7 +14,6 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["users_db"]
 users_collection = db["users"]
 
-
 @strawberry.type
 class Query:
     @strawberry.field
@@ -22,15 +21,16 @@ class Query:
             self,
             user_id: str
     ) -> Union[User, Message]:
-        favorites = user_dict.get(user_id)
-        return User(userId=user_id, favorites=favorites) \
-            if user_id in user_dict else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
+        user = users_collection.find_one({"userId": user_id})
+        return User(userId=user_id, favorites=user["favorites"]) \
+            if user else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
 
     @strawberry.field
     def users(
             self
     ) -> List[User]:
-        return [User(userId=uid, favorites=favorites) for uid, favorites in user_dict.items()]
+        list_of_users = list(users_collection.find())
+        return [User(userId=user["userId"], favorites=user["favorites"]) for user in list_of_users]
 
     @strawberry.field
     def getWeatherData(
@@ -55,7 +55,7 @@ class Query:
         if error_message:
             return error_message
 
-        favorites = user_dict.get(input.userId)
+        favorites = users_collection.find_one({"userId": input.userId})['favorite']
         weather = [get_weather(favorite, input.requestDate) for favorite in favorites]
         return FavoriteLocationData(data=weather)
 
@@ -65,23 +65,34 @@ class Mutation:
     @strawberry.mutation
     def createUser(
             self,
-            userId: str
+            input: CreateUserInput
     ) -> Message:
-        if userId in user_dict:
-            return Message(message=f"NOT CREATED: User, {userId}, already exists.")
-        user_dict[userId] = []
-        return Message(message=f"CREATED: User, {userId}, created.")
+        if users_collection.find_one({"userId": input.userId}):
+            return Message(message=f"NOT CREATED: User, {input.userId}, already exists.")
+
+        if input.favorites is None:
+            favorites = []
+        else:
+            favorites = input.favorites
+
+        users_collection.insert_one({"userId": input.userId, "favorites": favorites})
+        return Message(message=f"CREATED: User, {input.userId}, created.")
 
     @strawberry.mutation
     def addFavorite(
             self,
             input: AddFavoriteInput
     ) -> Message:
-        favorites = user_dict.get(input.userId)
-        if favorites is None:
+        user = users_collection.find_one({"userId": input.userId})
+        favorites = user['favorites']
+        if user is None:
             return Message(message=f"NOT UPDATED: User, {input.userId}, was not found.")
-        if input.newFavorite not in user_dict[input.userId]:
-            user_dict[input.userId].append(input.newFavorite)
+        if input.newFavorite not in favorites:
+            favorites.append(input.newFavorite)
+            users_collection.update_one(
+                {"userId": input.userId},
+                {"$set": {"favorites": favorites}}
+            )
             return Message(message=f"UPDATED: {input.newFavorite}, has been added to {input.userId}'s "
                                    f"list of favorites: {favorites}")
         return Message(message=f"NOT UPDATED: {input.newFavorite}, is already on {input.userId}'s "
@@ -92,11 +103,16 @@ class Mutation:
             self,
             input: DeleteFavoriteInput
     ) -> Message:
-        favorites = user_dict.get(input.userId)
-        if favorites is None:
+        user = users_collection.find_one({"userId": input.userId})
+        favorites = user['favorites']
+        if user is None:
             return Message(message=f"User, {input.userId}, does not exists.")
         if input.exFavorite in favorites:
             favorites.remove(input.exFavorite)
+            users_collection.update_one(
+                {"userId": input.userId},
+                {"$set": {"favorites": favorites}}
+            )
             return Message(message=f"Success: {input.exFavorite}, has been removed from {input.userId}'s "
                                    f"list of favorites: {favorites}")
         return Message(message=f"That location is not on the User's, {input.userId}, favorites list.")

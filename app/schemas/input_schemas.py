@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from typing import Optional
+from typing import Optional, List
 import strawberry
 
 
@@ -19,6 +19,12 @@ class FavoriteForcastInput:
 class AddFavoriteInput:
     userId: str
     newFavorite: str
+
+
+@strawberry.input
+class CreateUserInput:
+    userId: str
+    favorites: Optional[List[str]] = None
 
 
 @strawberry.input
