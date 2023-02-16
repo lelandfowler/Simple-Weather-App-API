@@ -4,10 +4,15 @@ from app.schemas.input_schemas import WeatherDataInput, FavoriteForcastInput, Ad
 from app.schemas.utility_schemas import User, Message
 from app.schemas.weather_schemas import FavoriteLocationData, WeatherData
 from app.services.services import get_weather, validate_date
+from pymongo import MongoClient
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 import strawberry
 import uvicorn
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["users_db"]
+users_collection = db["users"]
 
 
 @strawberry.type
@@ -33,11 +38,11 @@ class Query:
             input: WeatherDataInput
     ) -> Union[Message, WeatherData]:
         # Validate the Date Input
-        error_message = validate_date(input.request_date)
+        error_message = validate_date(input.requestDate)
         if error_message:
             return error_message
 
-        weather = get_weather(input.city_name, input.request_date)
+        weather = get_weather(input.cityName, input.requestDate)
         return weather
 
     @strawberry.field
@@ -46,12 +51,12 @@ class Query:
             input: FavoriteForcastInput
     ) -> Union[Message, FavoriteLocationData]:
         # Validate the Date Input
-        error_message = validate_date(input.request_date)
+        error_message = validate_date(input.requestDate)
         if error_message:
             return error_message
 
         favorites = user_dict.get(input.userId)
-        weather = [get_weather(favorite, input.request_date) for favorite in favorites]
+        weather = [get_weather(favorite, input.requestDate) for favorite in favorites]
         return FavoriteLocationData(data=weather)
 
 
@@ -60,12 +65,12 @@ class Mutation:
     @strawberry.mutation
     def createUser(
             self,
-            user_id: str
+            userId: str
     ) -> Message:
-        if user_id in user_dict:
-            return Message(message=f"NOT CREATED: User, {user_id}, already exists.")
-        user_dict[user_id] = []
-        return Message(message=f"CREATED: User, {user_id}, created.")
+        if userId in user_dict:
+            return Message(message=f"NOT CREATED: User, {userId}, already exists.")
+        user_dict[userId] = []
+        return Message(message=f"CREATED: User, {userId}, created.")
 
     @strawberry.mutation
     def addFavorite(

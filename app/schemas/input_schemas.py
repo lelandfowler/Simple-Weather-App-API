@@ -5,14 +5,14 @@ import strawberry
 
 @strawberry.input
 class WeatherDataInput:
-    city_name: str
-    request_date: Optional[date] = date.today() + timedelta(days=1)
+    cityName: str
+    requestDate: Optional[date] = date.today() + timedelta(days=1)
 
 
 @strawberry.input
 class FavoriteForcastInput:
     userId: str
-    request_date: date = date.today() + timedelta(days=1)
+    requestDate: date = date.today() + timedelta(days=1)
 
 
 @strawberry.input
