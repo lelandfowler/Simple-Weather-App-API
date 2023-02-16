@@ -15,11 +15,11 @@ class Query:
     @strawberry.field
     def user(
             self,
-            userId: str
+            user_id: str
     ) -> Union[User, Message]:
-        favorites = user_dict.get(userId)
-        return User(userId=userId, favorites=favorites) \
-            if userId in user_dict else Message(message=f"NOT FOUND: User, {userId}, was not found.")
+        favorites = user_dict.get(user_id)
+        return User(userId=user_id, favorites=favorites) \
+            if user_id in user_dict else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
 
     @strawberry.field
     def users(
@@ -60,12 +60,12 @@ class Mutation:
     @strawberry.mutation
     def createUser(
             self,
-            userId: str
+            user_id: str
     ) -> Message:
-        if userId in user_dict:
-            return Message(message=f"NOT CREATED: User, {userId}, already exists.")
-        user_dict[userId] = []
-        return Message(message=f"CREATED: User, {userId}, created.")
+        if user_id in user_dict:
+            return Message(message=f"NOT CREATED: User, {user_id}, already exists.")
+        user_dict[user_id] = []
+        return Message(message=f"CREATED: User, {user_id}, created.")
 
     @strawberry.mutation
     def addFavorite(
