@@ -1,107 +1,32 @@
 from typing import Union, List
-from app.config.user_config import user_dict
-from app.schemas.input_schemas import WeatherDataInput, FavoriteForcastInput, AddFavoriteInput, DeleteFavoriteInput
+from app.resolvers.user_resolvers \
+    import get_users, get_user, createUser, add_favorite, delete_favorite
+from app.resolvers.weather_resolvers import get_weather_data, get_favorite_forecast
 from app.schemas.utility_schemas import User, Message
 from app.schemas.weather_schemas import FavoriteLocationData, WeatherData
-from app.services.services import get_weather, validate_date
-from pymongo import MongoClient
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 import strawberry
 import uvicorn
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["users_db"]
-users_collection = db["users"]
-
 
 @strawberry.type
 class Query:
-    @strawberry.field
-    def user(self, user_id: str) -> Union[User, Message]:
-        favorites = user_dict.get(user_id)
-        return User(userId=user_id, favorites=favorites) \
-            if user_id in user_dict else Message(message=f"NOT FOUND: User, {user_id}, was not found.")
-
-    @strawberry.field
-    def users(
-            self
-    ) -> List[User]:
-        return [User(userId=uid, favorites=favorites) for uid, favorites in user_dict.items()]
-
-    @strawberry.field
-    def getWeatherData(
-            self,
-            input: WeatherDataInput
-    ) -> Union[Message, WeatherData]:
-        # Validate the Date Input
-        error_message = validate_date(input.requestDate)
-        if error_message:
-            return error_message
-
-        weather = get_weather(input.cityName, input.requestDate)
-        return weather
-
-    @strawberry.field
-    def getFavoriteForcast(
-            self,
-            input: FavoriteForcastInput
-    ) -> Union[Message, FavoriteLocationData]:
-        # Validate the Date Input
-        error_message = validate_date(input.requestDate)
-        if error_message:
-            return error_message
-
-        favorites = user_dict.get(input.userId)
-        weather = [get_weather(favorite, input.requestDate) for favorite in favorites]
-        return FavoriteLocationData(data=weather)
+    user: Union[User, Message] = strawberry.field(resolver=get_user)
+    users: List[User] = strawberry.field(resolver=get_users)
+    weather: Union[Message, WeatherData] = strawberry.field(resolver=get_weather_data)
+    favoriteForecast: Union[Message, FavoriteLocationData] = strawberry.field(resolver=get_favorite_forecast)
 
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
-    def createUser(
-            self,
-            userId: str
-    ) -> Message:
-        if userId in user_dict:
-            return Message(message=f"NOT CREATED: User, {userId}, already exists.")
-        user_dict[userId] = []
-        return Message(message=f"CREATED: User, {userId}, created.")
-
-    @strawberry.mutation
-    def addFavorite(
-            self,
-            input: AddFavoriteInput
-    ) -> Message:
-        favorites = user_dict.get(input.userId)
-        if favorites is None:
-            return Message(message=f"NOT UPDATED: User, {input.userId}, was not found.")
-        if input.newFavorite not in user_dict[input.userId]:
-            user_dict[input.userId].append(input.newFavorite)
-            return Message(message=f"UPDATED: {input.newFavorite}, has been added to {input.userId}'s "
-                                   f"list of favorites: {favorites}")
-        return Message(message=f"NOT UPDATED: {input.newFavorite}, is already on {input.userId}'s "
-                               f"list of favorites: {favorites}")
-
-    @strawberry.mutation
-    def deleteFavorite(
-            self,
-            input: DeleteFavoriteInput
-    ) -> Message:
-        favorites = user_dict.get(input.userId)
-        if favorites is None:
-            return Message(message=f"User, {input.userId}, does not exists.")
-        if input.exFavorite in favorites:
-            favorites.remove(input.exFavorite)
-            return Message(message=f"Success: {input.exFavorite}, has been removed from {input.userId}'s "
-                                   f"list of favorites: {favorites}")
-        return Message(message=f"That location is not on the User's, {input.userId}, favorites list.")
+    createUser: Message = strawberry.mutation(resolver=createUser)
+    addFavorite: Message = strawberry.mutation(resolver=add_favorite)
+    deleteFavorite: Message = strawberry.mutation(resolver=delete_favorite)
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 graphql_app = GraphQLRouter(schema)
-
 app = FastAPI()
 app.include_router(graphql_app, prefix="/graphql")
 
