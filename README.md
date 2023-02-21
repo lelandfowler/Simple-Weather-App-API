@@ -32,17 +32,24 @@ Note: localhost can be used in place of 127.0.0.1
 1. Temperature
 2. Humidity
 
+
+### Other functionality:
+- Create User
+- Add Favorite Cities to User
+- Delete City from User Favorite Cities
+- Get User and Favorite Cities
+- Get City Weather Info by Date
+- Get City Weather for all favorites for a specified user
 <br>
 
 ### Resources:
 - API: [Fast API](https://fastapi.tiangolo.com)<br>
 - Utilizing GraphQL: [Strawberry](https://strawberry.rocks)<br>
 <br>
+- MongoDB: 
 
 ### Other Links
 - Weather Data Source: [Open Weather Map](https://home.openweathermap.org/api_keys)<br>
-- Requirements: [CZero Technical Assessment](https://czerotoday.notion.site/Technical-Assessment-cc5f624c821249d7917a81f112f1e043)<br>
-
 
 ## Section 2: Mac Deployment
 <p>To run this repository locally follow the steps below in your terminal (Note that these steps are valid for macOS details some installation steps may be different for Linux distros and Windows OS).</p>
@@ -141,7 +148,6 @@ __Testing__: Testing can be performed by utilizing Pytest, as described in the [
 
 ## Section 3: Coming Soon
 The following items will be addressed to improve this application at a later date:
-1. Integrate MongoDB for holding the user list
+1. Write Shell Script for installation of DB, Python, GraphQL, Poetry, and all locked dependencies.
 2. Add a Cache (Redis) for commonly requested cities
-3. Add Deployment instructions for Linus
-4. Handle HTTP exceptions with the data source API more comprehensively.
+3. Add Deployment instructions for Linux
