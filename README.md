@@ -45,8 +45,7 @@ Note: localhost can be used in place of 127.0.0.1
 ### Resources:
 - API: [Fast API](https://fastapi.tiangolo.com)<br>
 - Utilizing GraphQL: [Strawberry](https://strawberry.rocks)<br>
-<br>
-- MongoDB: 
+- MongoDB: <br>
 
 ### Other Links
 - Weather Data Source: [Open Weather Map](https://home.openweathermap.org/api_keys)<br>
